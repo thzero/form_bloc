@@ -44,7 +44,7 @@ class InputFieldBloc<Value, ExtraData> extends SingleFieldBloc<Value, Value, Inp
     Suggestions<Value>? suggestions,
     dynamic Function(Value value)? toJson,
     ExtraData? extraData,
-    BuildContext? context,
+    Object? context,
     TranslateCallback? translate,
   }) : super(
           context: context,

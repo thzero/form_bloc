@@ -48,7 +48,7 @@ class MultiSelectFieldBloc<Value, ExtraData> extends SingleFieldBloc<List<Value>
     List<Value> items = const [],
     dynamic Function(List<Value> value)? toJson,
     ExtraData? extraData,
-    BuildContext? context,
+    Object? context,
     TranslateCallback? translate,
   }) : super(
           context: context,

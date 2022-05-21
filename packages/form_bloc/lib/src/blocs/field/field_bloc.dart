@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection' show LinkedHashSet;
 
-import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
@@ -115,7 +114,7 @@ abstract class SingleFieldBloc<Value, Suggestion, State extends FieldBlocState<V
 
   StreamSubscription<void>? _revalidateFieldBlocsSubscription;
 
-  BuildContext? context;
+  Object? context;
   TranslateCallback? translate;
 
   SingleFieldBloc({
@@ -124,13 +123,11 @@ abstract class SingleFieldBloc<Value, Suggestion, State extends FieldBlocState<V
     required List<AsyncValidatorWrapper<Value>>? asyncValidators,
     required Duration asyncValidatorDebounceTime,
     required State initialState,
-    BuildContext? context,
-    TranslateCallback? translate,
+    this.context,
+    this.translate,
   })  : _validators = validators ?? [],
         _asyncValidators = asyncValidators ?? [],
         _asyncValidatorDebounceTime = asyncValidatorDebounceTime,
-        context = context,
-        translate = translate,
         super(initialState) {
     _setUpAsyncValidatorsSubscription();
   }
@@ -566,10 +563,8 @@ abstract class SingleFieldBloc<Value, Suggestion, State extends FieldBlocState<V
   @override
   void updateFormBloc(FormBloc formBloc, {bool autoValidate = false}) {
     _autoValidate = autoValidate;
-    this.context = formBloc.context;
-    if (this.translate == null) {
-      this.translate = formBloc.translate;
-    }
+    context = formBloc.context;
+    translate ??= formBloc.translate;
     if (!_autoValidate) {
       emit(state.copyWith(
         error: Param(null),
