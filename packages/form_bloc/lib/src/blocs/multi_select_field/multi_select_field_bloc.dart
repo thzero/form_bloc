@@ -52,7 +52,11 @@ class MultiSelectFieldBloc<Value, ExtraData> extends SingleFieldBloc<
     List<Value> items = const [],
     dynamic Function(List<Value> value)? toJson,
     ExtraData? extraData,
+    BuildContext? context,
+    TranslateCallback? translate,
   }) : super(
+          context: context,
+          translate: translate,
           equality: const ListEquality<Never>(),
           validators: validators,
           asyncValidators: asyncValidators,

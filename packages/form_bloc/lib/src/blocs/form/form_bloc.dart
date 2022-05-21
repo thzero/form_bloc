@@ -1,11 +1,14 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:form_bloc/src/blocs/field/field_bloc.dart';
 import 'package:rxdart/rxdart.dart';
 
 part 'form_state.dart';
+
+typedef TranslateCallback = String Function(BuildContext context, Object error);
 
 /// The base class for all `FormBlocs`.
 ///
@@ -35,12 +38,18 @@ abstract class FormBloc<SuccessResponse, FailureResponse>
   final bool _autoValidate;
 
   late final StreamSubscription _setupAreAllFieldsValidSubscriptionSubscription;
+  final BuildContext? context;
+  late TranslateCallback? translate;
 
   FormBloc({
     bool isLoading = false,
     bool autoValidate = true,
     bool isEditing = false,
+    BuildContext? context,
+    TranslateCallback? translate,
   })  : _autoValidate = autoValidate,
+        context = context,
+        translate = translate,
         super(isLoading
             ? FormBlocLoading(
                 isEditing: isEditing,
@@ -350,6 +359,37 @@ abstract class FormBloc<SuccessResponse, FailureResponse>
 
       _validateAndSubmit();
     }
+  }
+
+  void validate() async {
+    // get field blocs of the current step and validate
+    final currentFieldBlocs = state.fieldBlocs(state.currentStep)?.values ?? [];
+
+    final isValidDone = _isValidDone = MultiFieldBloc.validateAll(currentFieldBlocs);
+    final isValid = await isValidDone;
+
+    if (_isValidDone != isValidDone) return;
+
+    if (!isValid) {
+      emit(FormBlocSubmissionFailed(
+        isValidByStep: {
+          ...state._isValidByStep,
+          state.currentStep: false,
+        },
+        isEditing: state.isEditing,
+        fieldBlocs: state._fieldBlocs,
+        currentStep: state.currentStep,
+      ));
+      emit(state.toLoaded());
+      return;
+    }
+
+    emit(state._copyWith(
+      isValidByStep: {
+        ...state._isValidByStep,
+        state.currentStep: true,
+      },
+    ));
   }
 
   void _validateAndSubmit() async {
