@@ -33,6 +33,13 @@ class PasswordValidatorWrapper<Value> extends ValidatorWrapper<Value> {
   late RegExp? regex;
 }
 
+class ValidatorWrapperResults {
+  final String error;
+  final Map<String, String> params = Map();
+
+  ValidatorWrapperResults(this.error);
+}
+
 class FieldBlocValidators {
   FieldBlocValidators._();
 
@@ -80,10 +87,16 @@ class FieldBlocValidators {
         return null;
       }
       if (string.runes.length < wrapper2.min) {
-        return FieldBlocValidatorsErrors.emailMin;
+        ValidatorWrapperResults results = ValidatorWrapperResults(FieldBlocValidatorsErrors.emailMin);
+        results.params['min'] = wrapper2.min.toString();
+        return results;
+        // return FieldBlocValidatorsErrors.emailMin;
       }
       if (string.runes.length > wrapper2.max) {
-        return FieldBlocValidatorsErrors.emailMax;
+        ValidatorWrapperResults results = ValidatorWrapperResults(FieldBlocValidatorsErrors.emailMax);
+        results.params['max'] = wrapper2.max.toString();
+        return results;
+        // return FieldBlocValidatorsErrors.emailMax;
       }
 
       final emailRegExp = (wrapper2.regex != null ? wrapper2.regex! : RegExp(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'));
@@ -131,10 +144,16 @@ class FieldBlocValidators {
         return null;
       }
       if (string.runes.length < wrapper2.min) {
-        return FieldBlocValidatorsErrors.passwordMin;
+        ValidatorWrapperResults results = ValidatorWrapperResults(FieldBlocValidatorsErrors.passwordMin);
+        results.params['min'] = wrapper2.min.toString();
+        return results;
+        // return FieldBlocValidatorsErrors.passwordMin;
       }
       if (string.runes.length > wrapper2.max) {
-        return FieldBlocValidatorsErrors.passwordMax;
+        ValidatorWrapperResults results = ValidatorWrapperResults(FieldBlocValidatorsErrors.passwordMax);
+        results.params['max'] = wrapper2.max.toString();
+        return results;
+        // return FieldBlocValidatorsErrors.passwordMax;
       }
 
       if (wrapper2.regex != null) {
