@@ -41,7 +41,7 @@ class BooleanFieldBloc<ExtraData> extends SingleFieldBloc<bool, bool, BooleanFie
     Duration asyncValidatorDebounceTime = const Duration(milliseconds: 500),
     Suggestions<bool>? suggestions,
     ExtraData? extraData,
-    BuildContext? context,
+    Object? context,
     TranslateCallback? translate,
   }) : super(
           context: context,
