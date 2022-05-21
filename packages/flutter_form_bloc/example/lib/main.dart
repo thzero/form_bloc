@@ -48,12 +48,12 @@ class AllFieldsFormBloc extends FormBloc<String, String> {
 
   final select1 = SelectFieldBloc(
     items: ['Option 1', 'Option 2'],
-    validators: [FieldBlocValidators.required],
+    validators: [FieldBlocValidators.required()],
   );
 
   final select2 = SelectFieldBloc(
     items: ['Option 1', 'Option 2'],
-    validators: [FieldBlocValidators.required],
+    validators: [FieldBlocValidators.required()],
   );
 
   final multiSelect1 = MultiSelectFieldBloc<String, dynamic>(
