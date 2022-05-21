@@ -36,8 +36,8 @@ class BooleanFieldBloc<ExtraData> extends SingleFieldBloc<bool, bool, BooleanFie
   BooleanFieldBloc({
     String? name,
     bool initialValue = false,
-    List<Validator<bool>>? validators,
-    List<AsyncValidator<bool>>? asyncValidators,
+    List<ValidatorWrapper<bool>>? validators,
+    List<AsyncValidatorWrapper<bool>>? asyncValidators,
     Duration asyncValidatorDebounceTime = const Duration(milliseconds: 500),
     Suggestions<bool>? suggestions,
     ExtraData? extraData,

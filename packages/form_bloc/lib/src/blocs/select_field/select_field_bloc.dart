@@ -2,8 +2,7 @@ part of '../field/field_bloc.dart';
 
 /// A `FieldBloc` used to select one item
 /// from multiple items.
-class SelectFieldBloc<Value, ExtraData> extends SingleFieldBloc<Value?, Value,
-    SelectFieldBlocState<Value, ExtraData>, ExtraData?> {
+class SelectFieldBloc<Value, ExtraData> extends SingleFieldBloc<Value?, Value, SelectFieldBlocState<Value, ExtraData>, ExtraData?> {
   /// ## SelectFieldBloc<Value, ExtraData>
   ///
   /// ### Properties:
@@ -41,8 +40,8 @@ class SelectFieldBloc<Value, ExtraData> extends SingleFieldBloc<Value?, Value,
   SelectFieldBloc({
     String? name,
     Value? initialValue,
-    List<Validator<Value?>>? validators,
-    List<AsyncValidator<Value?>>? asyncValidators,
+    List<ValidatorWrapper<Value?>>? validators,
+    List<AsyncValidatorWrapper<Value?>>? asyncValidators,
     Duration asyncValidatorDebounceTime = const Duration(milliseconds: 500),
     Suggestions<Value>? suggestions,
     List<Value> items = const [],

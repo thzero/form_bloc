@@ -1,8 +1,7 @@
 part of '../field/field_bloc.dart';
 
 /// A `FieldBloc` used for any type, for example `DateTime` or `File`.
-class InputFieldBloc<Value, ExtraData> extends SingleFieldBloc<Value, Value,
-    InputFieldBlocState<Value, ExtraData>, ExtraData?> {
+class InputFieldBloc<Value, ExtraData> extends SingleFieldBloc<Value, Value, InputFieldBlocState<Value, ExtraData>, ExtraData?> {
   /// ## InputFieldBloc<Value, ExtraData>
   ///
   /// ### Properties:
@@ -39,8 +38,8 @@ class InputFieldBloc<Value, ExtraData> extends SingleFieldBloc<Value, Value,
   InputFieldBloc({
     String? name,
     required Value initialValue,
-    List<Validator<Value>>? validators,
-    List<AsyncValidator<Value>>? asyncValidators,
+    List<ValidatorWrapper<Value>>? validators,
+    List<AsyncValidatorWrapper<Value>>? asyncValidators,
     Duration asyncValidatorDebounceTime = const Duration(milliseconds: 500),
     Suggestions<Value>? suggestions,
     dynamic Function(Value value)? toJson,

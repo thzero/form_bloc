@@ -2,11 +2,7 @@ part of '../field/field_bloc.dart';
 
 /// A `FieldBloc` used to select multiple items
 /// from multiple items.
-class MultiSelectFieldBloc<Value, ExtraData> extends SingleFieldBloc<
-    List<Value>,
-    Value,
-    MultiSelectFieldBlocState<Value, ExtraData>,
-    ExtraData?> {
+class MultiSelectFieldBloc<Value, ExtraData> extends SingleFieldBloc<List<Value>, Value, MultiSelectFieldBlocState<Value, ExtraData>, ExtraData?> {
   /// ## MultiSelectFieldBloc<Value, ExtraData>
   ///
   /// ### Properties:
@@ -45,8 +41,8 @@ class MultiSelectFieldBloc<Value, ExtraData> extends SingleFieldBloc<
   MultiSelectFieldBloc({
     String? name,
     List<Value> initialValue = const [],
-    List<Validator<List<Value>>>? validators,
-    List<AsyncValidator<List<Value>>>? asyncValidators,
+    List<ValidatorWrapper<List<Value>>>? validators,
+    List<AsyncValidatorWrapper<List<Value>>>? asyncValidators,
     Duration asyncValidatorDebounceTime = const Duration(milliseconds: 500),
     Suggestions<Value>? suggestions,
     List<Value> items = const [],
@@ -162,12 +158,10 @@ class MultiSelectFieldBloc<Value, ExtraData> extends SingleFieldBloc<
   /// {@macro form_bloc.field_bloc.update_value}
   void select(Value valueToSelect) {
     var newValue = state.value;
-    newValue =
-        SingleFieldBloc._itemsWithoutDuplicates([...newValue, valueToSelect]);
+    newValue = SingleFieldBloc._itemsWithoutDuplicates([...newValue, valueToSelect]);
     if (_canUpdateValue(value: newValue, isInitialValue: false)) {
       final error = _getError(value: newValue);
-      final isValidating =
-          _getAsyncValidatorsError(value: newValue, error: error);
+      final isValidating = _getAsyncValidatorsError(value: newValue, error: error);
 
       emit(state.copyWith(
         isValueChanged: true,
@@ -190,8 +184,7 @@ class MultiSelectFieldBloc<Value, ExtraData> extends SingleFieldBloc<
     if (_canUpdateValue(value: newValue, isInitialValue: false)) {
       final error = _getError(value: newValue);
 
-      final isValidating =
-          _getAsyncValidatorsError(value: newValue, error: error);
+      final isValidating = _getAsyncValidatorsError(value: newValue, error: error);
 
       emit(state.copyWith(
         isValueChanged: true,
