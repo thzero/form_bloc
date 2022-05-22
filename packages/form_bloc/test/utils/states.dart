@@ -77,8 +77,7 @@ SelectFieldBlocState<Value, ExtraData> createSelectState<Value, ExtraData>({
   );
 }
 
-MultiSelectFieldBlocState<Value, ExtraData>
-    createMultiSelectState<Value, ExtraData>({
+MultiSelectFieldBlocState<Value, ExtraData> createMultiSelectState<Value, ExtraData>({
   FormBloc? formBloc,
   String name = 'fieldName',
   List<Value>? value,
@@ -130,8 +129,7 @@ InputFieldBlocState<Value, ExtraData> createInputState<Value, ExtraData>({
   );
 }
 
-ListFieldBlocState<T, ExtraData>
-    createListState<T extends FieldBloc, ExtraData>({
+ListFieldBlocState<T, ExtraData> createListState<T extends FieldBloc, ExtraData>({
   FormBloc? formBloc,
   required String name,
   bool isValidating = false,
@@ -149,8 +147,7 @@ ListFieldBlocState<T, ExtraData>
   );
 }
 
-GroupFieldBlocState<T, ExtraData>
-    createGroupState<T extends FieldBloc, ExtraData>({
+GroupFieldBlocState<T, ExtraData> createGroupState<T extends FieldBloc, ExtraData>({
   FormBloc? formBloc,
   required String name,
   bool isValidating = false,
@@ -165,5 +162,32 @@ GroupFieldBlocState<T, ExtraData>
     isValid: MultiFieldBloc.areFieldBlocsValid(fieldBlocs),
     fieldBlocs: fieldBlocs,
     extraData: extraData,
+  );
+}
+
+ValueItemSelectFieldBlocState<Value, Item, ExtraData> createValueItemSelectState<Value, Item, ExtraData>({
+  FormBloc? formBloc,
+  String name = 'fieldName',
+  Value? value,
+  List<Value>? items,
+  Object? error,
+  bool isDirty = false,
+  Suggestions<Value>? suggestions,
+  bool isValidated = true,
+  bool isValidating = false,
+}) {
+  return ValueItemSelectFieldBlocState<Value, ExtraData>(
+    formBloc: formBloc,
+    isValueChanged: false,
+    initialValue: value,
+    updatedValue: value,
+    value: value,
+    items: items ?? [],
+    error: error,
+    isDirty: isDirty,
+    suggestions: suggestions,
+    isValidated: isValidated,
+    isValidating: isValidating,
+    name: name,
   );
 }

@@ -23,6 +23,8 @@ part '../multi_select_field/multi_select_field_bloc.dart';
 part '../multi_select_field/multi_select_field_state.dart';
 part '../select_field/select_field_bloc.dart';
 part '../select_field/select_field_state.dart';
+part '../value_item_select_field/value_item_select_field_bloc.dart';
+part '../value_item_select_field/value_item_select_field_state.dart';
 part '../text_field/text_field_bloc.dart';
 part '../text_field/text_field_state.dart';
 part 'field_state.dart';
@@ -48,6 +50,7 @@ typedef Suggestions<Value> = Future<List<Value>> Function(String pattern);
 ///   * [BooleanFieldBloc].
 ///   * [SelectFieldBloc].
 ///   * [MultiSelectFieldBloc].
+///   * [ValueItemSelectFieldBloc].
 /// * [MultiFieldBloc]
 ///   * [GroupFieldBloc].
 ///   * [ListFieldBloc].
@@ -91,6 +94,7 @@ class DynamicValidatorWrapper<Value> extends ValidatorWrapper<Value> {
 /// * [BooleanFieldBloc].
 /// * [SelectFieldBloc].
 /// * [MultiSelectFieldBloc].
+///   * [ValueItemSelectFieldBloc].
 abstract class SingleFieldBloc<Value, Suggestion, State extends FieldBlocState<Value, Suggestion, ExtraData>, ExtraData> extends Cubit<State> with FieldBloc {
   bool _autoValidate = true;
 
