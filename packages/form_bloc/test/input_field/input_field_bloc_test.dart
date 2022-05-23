@@ -84,7 +84,7 @@ void main() {
         initialValue: true,
         // validators: [(value) => 'error'],
         validators: [
-          ValidatorWrapper<bool>.init((wrapper, value) => value! ? 'error' : null),
+          ValidatorWrapper<bool>.init((wrapper, value) => 'error'),
         ],
       );
 
