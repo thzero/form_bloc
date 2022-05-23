@@ -67,13 +67,12 @@ void main() {
         );
       });
 
-      test('validators verify the value and add the corresponding error.',
-          () async {
+      test('validators verify the value and add the corresponding error.', () async {
         final fieldBloc = InputFieldBloc<int?, dynamic>(
           name: 'fieldName',
           initialValue: null,
           validators: [
-            FieldBlocValidators.required,
+            FieldBlocValidators.required(),
             (value) => value! > 5 ? '> 5' : null,
             (value) => value == 3 ? '== 3' : null,
           ],
@@ -126,8 +125,7 @@ void main() {
         );
       });
 
-      test('asyncValidators verify the value and add the corresponding error.',
-          () async {
+      test('asyncValidators verify the value and add the corresponding error.', () async {
         final fieldBloc = InputFieldBloc<int?, dynamic>(
           name: 'fieldName',
           initialValue: null,
@@ -176,8 +174,7 @@ void main() {
         );
       });
 
-      test('_suggestions is added to suggestions of the current state.',
-          () async {
+      test('_suggestions is added to suggestions of the current state.', () async {
         Future<List<int>> suggestions(String pattern) async => [1, 2, 3];
         final fieldBloc = InputFieldBloc<int?, dynamic>(
           name: 'fieldName',
@@ -246,7 +243,7 @@ void main() {
       final fieldBloc = InputFieldBloc<int?, dynamic>(
         name: 'fieldName',
         initialValue: null,
-        validators: [FieldBlocValidators.required],
+        validators: [FieldBlocValidators.required()],
       );
 
       var state = createInputState<int?, dynamic>(
@@ -295,7 +292,7 @@ void main() {
       final fieldBloc = InputFieldBloc<int?, dynamic>(
         name: 'fieldName',
         initialValue: null,
-        validators: [FieldBlocValidators.required],
+        validators: [FieldBlocValidators.required()],
       );
 
       final state1 = createInputState<int?, dynamic>(
@@ -384,7 +381,7 @@ void main() {
       final fieldBloc = InputFieldBloc<int?, dynamic>(
         name: 'fieldName',
         initialValue: null,
-        validators: [FieldBlocValidators.required],
+        validators: [FieldBlocValidators.required()],
       );
 
       final state1 = createInputState<int?, dynamic>(
@@ -434,7 +431,7 @@ void main() {
       final fieldBloc = InputFieldBloc<int?, dynamic>(
         name: 'fieldName',
         initialValue: null,
-        validators: [FieldBlocValidators.required],
+        validators: [FieldBlocValidators.required()],
       );
 
       final state1 = fieldBloc.state.copyWith(
@@ -464,9 +461,7 @@ void main() {
       );
     });
 
-    test(
-        'selectSuggestion method SelectSuggestion event and selectedSuggestion stream.',
-        () {
+    test('selectSuggestion method SelectSuggestion event and selectedSuggestion stream.', () {
       final fieldBloc = InputFieldBloc<int?, dynamic>(
         name: 'fieldName',
         initialValue: null,
@@ -494,7 +489,7 @@ void main() {
 
         expectBloc(
           fieldBloc,
-          act: () => fieldBloc.addValidators([FieldBlocValidators.required]),
+          act: () => fieldBloc.addValidators([FieldBlocValidators.required()]),
           stream: [
             state = state.copyWith(
               error: Param(FieldBlocValidatorsErrors.required),
@@ -515,7 +510,7 @@ void main() {
         expectBloc(
           fieldBloc,
           act: () => fieldBloc.addValidators(
-            [FieldBlocValidators.required],
+            [FieldBlocValidators.required()],
             forceValidation: true,
           ),
           stream: [
@@ -534,7 +529,7 @@ void main() {
         final fieldBloc = InputFieldBloc<int?, dynamic>(
           name: 'fieldName',
           initialValue: 1,
-          validators: [FieldBlocValidators.required],
+          validators: [FieldBlocValidators.required()],
         );
 
         final state1 = createInputState<int?, dynamic>(
@@ -591,8 +586,7 @@ void main() {
 
         await expectBloc(
           fieldBloc,
-          act: () => fieldBloc.addAsyncValidators(
-              [(value) async => value == null ? '1 error' : null]),
+          act: () => fieldBloc.addAsyncValidators([(value) async => value == null ? '1 error' : null]),
           stream: [
             state2,
             state3,
@@ -652,7 +646,7 @@ void main() {
         name: 'fieldName',
         initialValue: 1,
         asyncValidatorDebounceTime: Duration(milliseconds: 0),
-        validators: [FieldBlocValidators.required],
+        validators: [FieldBlocValidators.required()],
         asyncValidators: [
           (value) async => value == 1 ? '1 error' : null,
         ],
@@ -721,8 +715,7 @@ void main() {
 
       await Future<void>.delayed(Duration(milliseconds: 10));
 
-      fieldBloc.updateAsyncValidators(
-          [(value) async => value == 2 ? '2 error' : null]);
+      fieldBloc.updateAsyncValidators([(value) async => value == 2 ? '2 error' : null]);
 
       // wait debounce time
       await Future<void>.delayed(Duration(milliseconds: 10));
@@ -735,7 +728,7 @@ void main() {
         final fieldBloc = InputFieldBloc<int?, dynamic>(
           name: 'fieldName',
           initialValue: null,
-          validators: [FieldBlocValidators.required],
+          validators: [FieldBlocValidators.required()],
         );
 
         final state2 = fieldBloc.state.copyWith(
@@ -758,8 +751,7 @@ void main() {
 
     group('removeAsyncValidators', () {
       test('remove async validators and not emit error', () async {
-        Future<String?> validator(int? value) async =>
-            value == null ? '1 error' : null;
+        Future<String?> validator(int? value) async => value == null ? '1 error' : null;
 
         final fieldBloc = InputFieldBloc<int?, dynamic>(
           name: 'fieldName',
@@ -831,19 +823,20 @@ void main() {
       fieldBloc.updateSuggestions(null);
     });
 
-    test(
-        'after DisableFieldBlocAutoValidate event was dispatched, updateValue method updates the value without verify the value in validators and asyncValidators.',
-        () async {
+    test('after DisableFieldBlocAutoValidate event was dispatched, updateValue method updates the value without verify the value in validators and asyncValidators.', () async {
       final fieldBloc = InputFieldBloc<int?, dynamic>(
         name: 'fieldName',
         initialValue: null,
         validators: [
-          FieldBlocValidators.required,
-          (value) => value! > 5 ? '> 5' : null,
-          (value) => value == 3 ? '== 3' : null,
+          FieldBlocValidators.required(),
+          // (value) => value! > 5 ? '> 5' : null,
+          ValidatorWrapper<int?>.init((wrapper, value) => value! > 5 ? '> 5' : null),
+          // (value) => value == 3 ? '== 3' : null,
+          ValidatorWrapper<int?>.init((wrapper, value) => value == 3 ? '== 3' : null),
         ],
         asyncValidators: [
-          (value) async => value == 2 ? 'async == 2' : null,
+          // (value) async => value == 2 ? 'async == 2' : null,
+          AsyncValidatorWrapper<int?>.init((wrapper, value) async => value == 2 ? 'async == 2' : null),
         ],
       );
 
@@ -970,8 +963,7 @@ void main() {
       fieldBloc.updateStateError(error: 'error2', value: null);
     });
 
-    test('on subscribeToFieldBlocs method and SubscribeToFieldBlocs event.',
-        () async {
+    test('on subscribeToFieldBlocs method and SubscribeToFieldBlocs event.', () async {
       final fieldBloc1 = InputFieldBloc<int?, dynamic>(
         name: 'fieldName',
         initialValue: null,
@@ -1141,9 +1133,7 @@ void main() {
         fieldBloc.updateValue(1);
       });
 
-      test(
-          'addError method with isPermanent true after disable auto validation.',
-          () async {
+      test('addError method with isPermanent true after disable auto validation.', () async {
         final fieldBloc = InputFieldBloc<int, dynamic>(
           initialValue: 1,
           name: 'fieldName',
@@ -1192,8 +1182,7 @@ void main() {
         fieldBloc.updateValue(1);
       });
 
-      test('addError method isPermanent false after disable auto validation.',
-          () async {
+      test('addError method isPermanent false after disable auto validation.', () async {
         final fieldBloc = InputFieldBloc<int?, dynamic>(
           name: 'fieldName',
           initialValue: null,

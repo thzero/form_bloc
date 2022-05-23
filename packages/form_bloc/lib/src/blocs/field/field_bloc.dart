@@ -75,10 +75,16 @@ mixin FieldBloc<State extends FieldBlocStateBase> on BlocBase<State> {
 }
 
 class ValidatorWrapper<Value> {
+  ValidatorWrapper();
+  ValidatorWrapper.init(this.validator);
+
   late Validator<Value> validator;
 }
 
 class AsyncValidatorWrapper<Value> {
+  AsyncValidatorWrapper();
+  AsyncValidatorWrapper.init(this.validator);
+
   late AsyncValidator<Value> validator;
 }
 

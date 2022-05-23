@@ -49,8 +49,8 @@ class FieldBlocValidators {
   ///
   /// Returns [FieldBlocValidatorsErrors.required]
   /// if is not valid.
-  static ValidatorWrapper<String> required() {
-    ValidatorWrapper<String> validator = ValidatorWrapper<String>();
+  static ValidatorWrapper<Value> required<Value>() {
+    ValidatorWrapper<Value> validator = ValidatorWrapper<Value>();
     validator.validator = (ValidatorWrapper wrapper, dynamic value) {
       if (value == null || value == false || ((value is Iterable || value is String || value is Map) && value.length == 0)) {
         return FieldBlocValidatorsErrors.required;

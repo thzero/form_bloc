@@ -169,20 +169,20 @@ ValueItemSelectFieldBlocState<Value, Item, ExtraData> createValueItemSelectState
   FormBloc? formBloc,
   String name = 'fieldName',
   Value? value,
-  List<Value>? items,
+  Map<Value, Item>? items,
   Object? error,
   bool isDirty = false,
   Suggestions<Value>? suggestions,
   bool isValidated = true,
   bool isValidating = false,
 }) {
-  return ValueItemSelectFieldBlocState<Value, ExtraData>(
+  return ValueItemSelectFieldBlocState<Value, Item, ExtraData>(
     formBloc: formBloc,
     isValueChanged: false,
     initialValue: value,
     updatedValue: value,
     value: value,
-    items: items ?? [],
+    items: items ?? {},
     error: error,
     isDirty: isDirty,
     suggestions: suggestions,
