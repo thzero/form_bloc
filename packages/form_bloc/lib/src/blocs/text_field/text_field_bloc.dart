@@ -4,8 +4,7 @@ part of '../field/field_bloc.dart';
 /// it is also used to obtain `int` and `double` values
 /// ​​of texts thanks to the methods
 /// [valueToInt] and [valueToDouble].
-class TextFieldBloc<ExtraData> extends SingleFieldBloc<String, String,
-    TextFieldBlocState<ExtraData?>, ExtraData?> {
+class TextFieldBloc<ExtraData> extends SingleFieldBloc<String, String, TextFieldBlocState<ExtraData?>, ExtraData?> {
   /// ## TextFieldBloc<ExtraData>
   ///
   /// ### Properties:
@@ -40,8 +39,8 @@ class TextFieldBloc<ExtraData> extends SingleFieldBloc<String, String,
   TextFieldBloc({
     String? name,
     String initialValue = '',
-    List<Validator<String>>? validators,
-    List<AsyncValidator<String>>? asyncValidators,
+    List<ValidatorWrapper<String>>? validators,
+    List<AsyncValidatorWrapper<String>>? asyncValidators,
     Duration asyncValidatorDebounceTime = const Duration(milliseconds: 500),
     Suggestions<String>? suggestions,
     ExtraData? extraData,

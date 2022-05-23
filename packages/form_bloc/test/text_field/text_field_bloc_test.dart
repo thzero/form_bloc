@@ -9,9 +9,13 @@ void main() {
     group('constructor:', () {
       test('call the super constructor correctly.', () {
         Future<List<String>> suggestions(String pattern) async => ['1'];
+        // final validators = [
+        //   FieldBlocValidators.required,
+        //   (String? value) => 'error',
+        // ];
         final validators = [
-          FieldBlocValidators.required,
-          (String? value) => 'error',
+          FieldBlocValidators.required<String>(),
+          ValidatorWrapper<String>.init((wrapper, value) => 'error'),
         ];
 
         final fieldBloc = TextFieldBloc<dynamic>(
@@ -77,10 +81,15 @@ void main() {
 
       fieldBloc.close();
 
+      ValidatorWrapper<String> validator = ValidatorWrapper<String>();
+      validator.validator = (wrapper, value) => 'error';
       fieldBloc = TextFieldBloc<dynamic>(
         name: 'name',
         initialValue: 'a',
-        validators: [(value) => 'error'],
+        // validators: [(value) => 'error'],
+        validators: [
+          ValidatorWrapper<String>.init((wrapper, value) => 'error'),
+        ],
       );
 
       initialState = createTextState<dynamic>(

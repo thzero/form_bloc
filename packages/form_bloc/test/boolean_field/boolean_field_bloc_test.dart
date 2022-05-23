@@ -9,7 +9,9 @@ void main() {
     group('constructor:', () {
       test('call the super constructor correctly.', () {
         Future<List<bool>> suggestions(String pattern) async => [true];
-        final validators = [(bool? value) => value! ? 'error' : null];
+        ValidatorWrapper<bool> validator = ValidatorWrapper<bool>();
+        validator.validator = (wrapper, value) => value ? 'error' : null;
+        final validators = [validator];
 
         final fieldBloc = BooleanFieldBloc<dynamic>(
           name: 'name',
@@ -73,11 +75,12 @@ void main() {
 
         fieldBloc.close();
 
-        fieldBloc = BooleanFieldBloc<dynamic>(
-          name: 'name',
-          initialValue: true,
-          validators: [FieldBlocValidators.required, (value) => 'error'],
-        );
+        ValidatorWrapper<bool> validator = ValidatorWrapper<bool>();
+        validator.validator = (wrapper, value) => value ? 'error' : null;
+        final validators = [validator];
+        fieldBloc = BooleanFieldBloc<dynamic>(name: 'name', initialValue: true,
+            // validators: [(value) => 'error'],
+            validators: [FieldBlocValidators.required(), validator]);
 
         initialState = createBooleanState<dynamic>(
           value: true,

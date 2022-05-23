@@ -1,8 +1,9 @@
 part of '../field/field_bloc.dart';
 
-/// A `FieldBloc` used for any type, for example `DateTime` or `File`.
-class InputFieldBloc<Value, ExtraData> extends SingleFieldBloc<Value, Value, InputFieldBlocState<Value, ExtraData>, ExtraData?> {
-  /// ## InputFieldBloc<Value, ExtraData>
+/// A `FieldBloc` used to select one item
+/// from multiple items.
+class ValueItemSelectFieldBloc<Value, Item, ExtraData> extends SingleFieldBloc<Value?, Value, ValueItemSelectFieldBlocState<Value, Item, ExtraData>, ExtraData?> {
+  /// ## SelectFieldBloc<Value, ExtraData>
   ///
   /// ### Properties:
   ///
@@ -12,11 +13,11 @@ class InputFieldBloc<Value, ExtraData> extends SingleFieldBloc<Value, Value, Inp
   /// by default is `null`.
   /// * [validators] : List of [Validator]s.
   /// Each time the `value` will change,
-  /// if the [FormBloc] that use this [InputFieldBloc] has set
+  /// if the [FormBloc] that use this [SelectFieldBloc] has set
   /// in the `super` constructor `autoValidate = true`,
   /// the `value` is passed to each `validator`,
   /// and if any `validator` returns a `String error`,
-  /// it will be added to [InputFieldBlocState.error].
+  /// it will be added to [SelectFieldBlocState.error].
   /// Else if `autoValidate = false`, the value will be checked only
   /// when you call [validate] which is called automatically when call [FormBloc.submit].
   /// * [asyncValidators] : List of [AsyncValidator]s.
@@ -27,32 +28,32 @@ class InputFieldBloc<Value, ExtraData> extends SingleFieldBloc<Value, Value, Inp
   /// Very useful for reduce the number of invocations of each `asyncValidator.
   /// For example, used for prevent limit in API calls.
   /// * [suggestions] : This need be a [Suggestions] and will be
-  /// added to [InputFieldBlocState.suggestions].
+  /// added to [SelectFieldBlocState.suggestions].
   /// It is used to suggest values, usually from an API,
   /// and any of those suggestions can be used to update
   /// the value using [updateValue].
-  /// * [toJson] Transform [value] in a JSON value.
+  /// * [items] : The list of items that can be selected to update the value.
+  /// * [toJson] : Transform [value] in a JSON value.
   /// By default returns [value].
   /// This method is called when you use [FormBlocState.toJson]
   /// * [extraData] : It is an object that you can use to add extra data, it will be available in the state [FieldBlocState.extraData].
-  InputFieldBloc({
+  ValueItemSelectFieldBloc({
     String? name,
-    required Value initialValue,
-    List<ValidatorWrapper<Value>>? validators,
-    List<AsyncValidatorWrapper<Value>>? asyncValidators,
+    Value? initialValue,
+    List<ValidatorWrapper<Value?>>? validators,
+    List<AsyncValidatorWrapper<Value?>>? asyncValidators,
     Duration asyncValidatorDebounceTime = const Duration(milliseconds: 500),
     Suggestions<Value>? suggestions,
-    dynamic Function(Value value)? toJson,
+    Map<Value, Item> items = const {},
+    dynamic Function(Value? value)? toJson,
     ExtraData? extraData,
-    Object? context,
     TranslateCallback? translate,
   }) : super(
-          context: context,
           translate: translate,
           validators: validators,
           asyncValidators: asyncValidators,
           asyncValidatorDebounceTime: asyncValidatorDebounceTime,
-          initialState: InputFieldBlocState(
+          initialState: ValueItemSelectFieldBlocState(
             isValueChanged: false,
             initialValue: initialValue,
             updatedValue: initialValue,
@@ -76,8 +77,46 @@ class InputFieldBloc<Value, ExtraData> extends SingleFieldBloc<Value, Value, Inp
               value: initialValue,
             ),
             name: FieldBlocUtils.generateName(name),
+            items: items,
             toJson: toJson,
             extraData: extraData,
           ),
         );
+
+  /// Add [value] to the current `items`
+  /// of the current state.
+  void addItem(Value value, Item item) {
+    var items = state.items;
+    items[value] = item;
+    emit(state.copyWith(
+      items: items,
+    ));
+  }
+
+  /// Remove [item] to the current `items`
+  /// of the current state.
+  void removeItem(Value valueR) {
+    var items = state.items;
+    if (items.isNotEmpty) {
+      if (items.containsKey(valueR)) {
+        items.remove(valueR);
+      }
+      emit(state.copyWith(
+        items: items,
+        value: items.containsKey(value) ? null : Param(null),
+      ));
+    }
+  }
+
+  /// Set [items] to the `items` of the current state.
+  ///
+  /// If you want to add or remove elements to `items`
+  /// of the current state,
+  /// use [addItem] or [removeItem].
+  void updateItems(Map<Value, Item> items) {
+    emit(state.copyWith(
+      items: items,
+      value: items.containsKey(value) ? null : Param(null),
+    ));
+  }
 }

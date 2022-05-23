@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection' show LinkedHashSet;
 
-import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
@@ -24,6 +23,8 @@ part '../multi_select_field/multi_select_field_bloc.dart';
 part '../multi_select_field/multi_select_field_state.dart';
 part '../select_field/select_field_bloc.dart';
 part '../select_field/select_field_state.dart';
+part '../value_item_select_field/value_item_select_field_bloc.dart';
+part '../value_item_select_field/value_item_select_field_state.dart';
 part '../text_field/text_field_bloc.dart';
 part '../text_field/text_field_state.dart';
 part 'field_state.dart';
@@ -31,12 +32,12 @@ part 'field_state.dart';
 /// Signature for the [Validator] function which takes [value]
 /// and should returns a `Object` error, and if doesn't have error
 /// should return `null`.
-typedef Validator<Value> = Object? Function(Value value);
+typedef Validator<Value> = Object? Function(ValidatorWrapper<Value> validator, Value value);
 
 /// Signature for the [AsyncValidator] function which takes [value]
 /// and should returns a `Object` error, and if doesn't have error
 /// should return `null`.
-typedef AsyncValidator<Value> = Future<Object?> Function(Value value);
+typedef AsyncValidator<Value> = Future<Object?> Function(AsyncValidatorWrapper<Value> validator, Value value);
 
 /// Signature for the [Suggestions] function which takes [pattern]
 /// and should returns a `Future` with a `List<Value>`.
@@ -49,6 +50,7 @@ typedef Suggestions<Value> = Future<List<Value>> Function(String pattern);
 ///   * [BooleanFieldBloc].
 ///   * [SelectFieldBloc].
 ///   * [MultiSelectFieldBloc].
+///   * [ValueItemSelectFieldBloc].
 /// * [MultiFieldBloc]
 ///   * [GroupFieldBloc].
 ///   * [ListFieldBloc].
@@ -72,6 +74,24 @@ mixin FieldBloc<State extends FieldBlocStateBase> on BlocBase<State> {
   void removeFormBloc(FormBloc formBloc);
 }
 
+class ValidatorWrapper<Value> {
+  ValidatorWrapper();
+  ValidatorWrapper.init(this.validator);
+
+  late Validator<Value> validator;
+}
+
+class AsyncValidatorWrapper<Value> {
+  AsyncValidatorWrapper();
+  AsyncValidatorWrapper.init(this.validator);
+
+  late AsyncValidator<Value> validator;
+}
+
+class DynamicValidatorWrapper<Value> extends ValidatorWrapper<Value> {
+  late String error;
+}
+
 /// The base class with the common behavior
 /// of all single field blocs:
 ///
@@ -80,16 +100,13 @@ mixin FieldBloc<State extends FieldBlocStateBase> on BlocBase<State> {
 /// * [BooleanFieldBloc].
 /// * [SelectFieldBloc].
 /// * [MultiSelectFieldBloc].
-abstract class SingleFieldBloc<
-    Value,
-    Suggestion,
-    State extends FieldBlocState<Value, Suggestion, ExtraData>,
-    ExtraData> extends Cubit<State> with FieldBloc {
+///   * [ValueItemSelectFieldBloc].
+abstract class SingleFieldBloc<Value, Suggestion, State extends FieldBlocState<Value, Suggestion, ExtraData>, ExtraData> extends Cubit<State> with FieldBloc {
   bool _autoValidate = true;
 
-  List<Validator<Value>> _validators;
+  List<ValidatorWrapper> _validators;
 
-  List<AsyncValidator<Value>> _asyncValidators;
+  List<AsyncValidatorWrapper<Value>> _asyncValidators;
 
   final Duration _asyncValidatorDebounceTime;
 
@@ -107,22 +124,20 @@ abstract class SingleFieldBloc<
 
   StreamSubscription<void>? _revalidateFieldBlocsSubscription;
 
-  BuildContext? context;
+  Object? context;
   TranslateCallback? translate;
 
   SingleFieldBloc({
     Equality<Value> equality = const DefaultEquality<Never>(),
-    required List<Validator<Value>>? validators,
-    required List<AsyncValidator<Value>>? asyncValidators,
+    required List<ValidatorWrapper<Value>>? validators,
+    required List<AsyncValidatorWrapper<Value>>? asyncValidators,
     required Duration asyncValidatorDebounceTime,
     required State initialState,
-    BuildContext? context,
-    TranslateCallback? translate,
+    this.context,
+    this.translate,
   })  : _validators = validators ?? [],
         _asyncValidators = asyncValidators ?? [],
         _asyncValidatorDebounceTime = asyncValidatorDebounceTime,
-        context = context,
-        translate = translate,
         super(initialState) {
     _setUpAsyncValidatorsSubscription();
   }
@@ -131,8 +146,7 @@ abstract class SingleFieldBloc<
   ///
   /// For add a [Suggestion] to this stream call
   /// [selectSuggestion].
-  Stream<Suggestion> get selectedSuggestion =>
-      _selectedSuggestionSubject.stream;
+  Stream<Suggestion> get selectedSuggestion => _selectedSuggestionSubject.stream;
 
   // ===========================================================================
   // Utility
@@ -180,11 +194,9 @@ abstract class SingleFieldBloc<
         .doOnData((states) => _onStart(states.first, states.last))
         .debounceTime(debounceTime)
         .switchMap<List<dynamic>>(
-          (states) => onData(states.first, states.last)
-              .map((r) => <dynamic>[states.first, states.last, r]),
+          (states) => onData(states.first, states.last).map((r) => <dynamic>[states.first, states.last, r]),
         )
-        .listen((list) =>
-            _onFinish(list[0] as State, list[1] as State, list[2] as R));
+        .listen((list) => _onFinish(list[0] as State, list[1] as State, list[2] as R));
   }
 
   // ===========================================================================
@@ -260,7 +272,7 @@ abstract class SingleFieldBloc<
   /// Add [validators] to the current `validators` for check
   /// if `value` of the current state has an error.
   void addValidators(
-    List<Validator<Value>> validators, {
+    List<ValidatorWrapper<Value>> validators, {
     bool forceValidation = false,
   }) {
     _validators.addAll(validators);
@@ -271,7 +283,7 @@ abstract class SingleFieldBloc<
   /// Add [asyncValidators] to the current `validators` for check
   /// if `value` of the current state has an error.
   void addAsyncValidators(
-    List<AsyncValidator<Value>> asyncValidators, {
+    List<AsyncValidatorWrapper<Value>> asyncValidators, {
     bool forceValidation = false,
   }) {
     _asyncValidators.addAll(asyncValidators);
@@ -280,8 +292,7 @@ abstract class SingleFieldBloc<
   }
 
   /// Updates the current `validators` with [validators].
-  void updateValidators(List<Validator<Value>> validators,
-      {bool forceValidation = false}) {
+  void updateValidators(List<ValidatorWrapper<Value>> validators, {bool forceValidation = false}) {
     _validators = validators;
 
     _maybeValidate(forceValidation);
@@ -289,7 +300,7 @@ abstract class SingleFieldBloc<
 
   /// Updates the current `asyncValidators` with [asyncValidators].
   void updateAsyncValidators(
-    List<AsyncValidator<Value>> asyncValidators, {
+    List<AsyncValidatorWrapper<Value>> asyncValidators, {
     bool forceValidation = false,
   }) {
     _asyncValidators = asyncValidators;
@@ -299,8 +310,7 @@ abstract class SingleFieldBloc<
 
   /// Add [validators] to the current `validators` for check
   /// if `value` of the current state has an error.
-  void removeValidators(List<Validator<Value>> validators,
-      {bool forceValidation = false}) {
+  void removeValidators(List<ValidatorWrapper<Value>> validators, {bool forceValidation = false}) {
     _validators.removeAll(validators);
 
     _maybeValidate(forceValidation);
@@ -309,7 +319,7 @@ abstract class SingleFieldBloc<
   /// Add [asyncValidators] to the current `validators` for check
   /// if `value` of the current state has an error.
   void removeAsyncValidators(
-    List<AsyncValidator<Value>> asyncValidators, {
+    List<AsyncValidatorWrapper<Value>> asyncValidators, {
     bool forceValidation = false,
   }) {
     _asyncValidators.removeAll(asyncValidators);
@@ -378,8 +388,11 @@ abstract class SingleFieldBloc<
   void addFieldError(Object error, {bool isPermanent = false}) {
     if (isPermanent) {
       final wrongValue = value;
+      DynamicValidatorWrapper<Value> validator = DynamicValidatorWrapper<Value>();
+      validator.validator = (wrapper, value) => value == wrongValue ? (wrapper as DynamicValidatorWrapper).error : null;
       addValidators(
-        [(value) => value == wrongValue ? error : null],
+        // [(value) => value == wrongValue ? error : null],
+        [validator],
         forceValidation: true,
       );
     } else {
@@ -482,7 +495,7 @@ abstract class SingleFieldBloc<
 
     if (forceValidation || _autoValidate) {
       for (var validator in _validators) {
-        error = validator(value);
+        error = validator.validator(validator, value);
         if (error != null) {
           if (context != null && translate != null) {
             error = translate!(context!, error);
@@ -509,9 +522,7 @@ abstract class SingleFieldBloc<
 
     bool isValidating;
 
-    isValidating = (_autoValidate || forceValidation) &&
-        !hasError &&
-        _asyncValidators.isNotEmpty;
+    isValidating = (_autoValidate || forceValidation) && !hasError && _asyncValidators.isNotEmpty;
 
     if (isValidating) {
       _asyncValidatorsSubject.add(value);
@@ -521,15 +532,13 @@ abstract class SingleFieldBloc<
   }
 
   /// Returns the error of the [_initialValue].
-  Object? get _getInitialStateError =>
-      _getError(value: state.initialValue, isInitialState: true);
+  Object? get _getInitialStateError => _getError(value: state.initialValue, isInitialState: true);
 
   /// Returns the `isValidating` of the `initialState`.
   bool get _getInitialStateIsValidating {
     final hasInitialStateError = _getInitialStateError != null;
 
-    var isValidating =
-        _autoValidate && !hasInitialStateError && _asyncValidators.isNotEmpty;
+    var isValidating = _autoValidate && !hasInitialStateError && _asyncValidators.isNotEmpty;
 
     return isValidating;
   }
@@ -564,10 +573,8 @@ abstract class SingleFieldBloc<
   @override
   void updateFormBloc(FormBloc formBloc, {bool autoValidate = false}) {
     _autoValidate = autoValidate;
-    this.context = formBloc.context;
-    if (this.translate == null) {
-      this.translate = formBloc.translate;
-    }
+    context = formBloc.context;
+    translate ??= formBloc.translate;
     if (!_autoValidate) {
       emit(state.copyWith(
         error: Param(null),
@@ -597,18 +604,15 @@ abstract class SingleFieldBloc<
   ///
   /// This method removes duplicate values.
   /// {@endtemplate}
-  static List<Value> _itemsWithoutDuplicates<Value>(List<Value> items) =>
-      items.isEmpty ? items : LinkedHashSet<Value>.from(items).toList();
+  static List<Value> _itemsWithoutDuplicates<Value>(List<Value> items) => items.isEmpty ? items : LinkedHashSet<Value>.from(items).toList();
 
   void _setUpAsyncValidatorsSubscription() {
-    _asyncValidatorsSubscription = _asyncValidatorsSubject
-        .debounceTime(_asyncValidatorDebounceTime)
-        .switchMap((value) async* {
+    _asyncValidatorsSubscription = _asyncValidatorsSubject.debounceTime(_asyncValidatorDebounceTime).switchMap((value) async* {
       Object? error;
 
       if (error == null) {
         for (var asyncValidator in _asyncValidators) {
-          error = await asyncValidator(value);
+          error = await asyncValidator.validator(asyncValidator, value);
           if (error != null) break;
         }
       }
@@ -659,8 +663,7 @@ class ValidationStatus extends Equatable {
   }
 }
 
-class MultiFieldBloc<ExtraData, TState extends MultiFieldBlocState<ExtraData>>
-    extends Cubit<TState> with FieldBloc<TState> {
+class MultiFieldBloc<ExtraData, TState extends MultiFieldBlocState<ExtraData>> extends Cubit<TState> with FieldBloc<TState> {
   late final StreamSubscription _onValidationStatus;
 
   bool _autoValidate = false;
@@ -789,8 +792,7 @@ class MultiFieldBloc<ExtraData, TState extends MultiFieldBlocState<ExtraData>>
 
     for (final fieldBloc in fieldBlocs) {
       if (fieldBloc is MultiFieldBloc) {
-        final contains =
-            MultiFieldBloc.deepContains(fieldBloc.state.flatFieldBlocs, target);
+        final contains = MultiFieldBloc.deepContains(fieldBloc.state.flatFieldBlocs, target);
         if (contains) {
           return true;
         }
@@ -801,14 +803,11 @@ class MultiFieldBloc<ExtraData, TState extends MultiFieldBlocState<ExtraData>>
     return false;
   }
 
-  static bool areFieldBlocsValid(Iterable<FieldBloc> fieldBlocs) =>
-      fieldBlocs.every(_isFieldBlocValid);
+  static bool areFieldBlocsValid(Iterable<FieldBloc> fieldBlocs) => fieldBlocs.every(_isFieldBlocValid);
 
-  static bool areFieldBlocsValidating(Iterable<FieldBloc> fieldBlocs) =>
-      fieldBlocs.every(_isFieldBlocValidating);
+  static bool areFieldBlocsValidating(Iterable<FieldBloc> fieldBlocs) => fieldBlocs.every(_isFieldBlocValidating);
 
   static bool _isFieldBlocValid(FieldBloc field) => field.state.isValid;
 
-  static bool _isFieldBlocValidating(FieldBloc field) =>
-      field.state.isValidating;
+  static bool _isFieldBlocValidating(FieldBloc field) => field.state.isValidating;
 }

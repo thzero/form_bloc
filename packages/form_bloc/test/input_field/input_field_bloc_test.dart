@@ -9,9 +9,13 @@ void main() {
     group('constructor:', () {
       test('call the super constructor correctly.', () {
         Future<List<bool>> suggestions(String pattern) async => [true];
+        // final validators = [
+        //   FieldBlocValidators.required,
+        //   (bool? value) => value! ? 'error' : null,
+        // ];
         final validators = [
-          FieldBlocValidators.required,
-          (bool? value) => value! ? 'error' : null,
+          FieldBlocValidators.required<bool?>(),
+          ValidatorWrapper<bool?>.init((wrapper, value) => value! ? 'error' : null),
         ];
 
         final fieldBloc = InputFieldBloc<bool?, dynamic>(
@@ -78,7 +82,10 @@ void main() {
       fieldBloc = InputFieldBloc<bool, dynamic>(
         name: 'name',
         initialValue: true,
-        validators: [(value) => 'error'],
+        // validators: [(value) => 'error'],
+        validators: [
+          ValidatorWrapper<bool>.init((wrapper, value) => 'error'),
+        ],
       );
 
       initialState = createInputState<bool, dynamic>(
@@ -127,8 +134,7 @@ void main() {
     test('extraData added to extraData in state', () async {
       final expectedExtraData = 0;
 
-      final fieldBloc =
-          InputFieldBloc<int?, int>(initialValue: null, extraData: 0);
+      final fieldBloc = InputFieldBloc<int?, int>(initialValue: null, extraData: 0);
 
       expect(
         fieldBloc.state.extraData,

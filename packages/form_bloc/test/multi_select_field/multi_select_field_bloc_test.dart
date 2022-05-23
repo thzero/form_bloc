@@ -10,9 +10,13 @@ void main() {
     group('constructor:', () {
       test('call the super constructor correctly.', () {
         Future<List<bool>> suggestions(String pattern) async => [true];
+        // final validators = [
+        //   FieldBlocValidators.required,
+        //   (List<bool>? value) => 'error',
+        // ];
         final validators = [
-          FieldBlocValidators.required,
-          (List<bool>? value) => 'error',
+          FieldBlocValidators.required<List<bool>>(),
+          ValidatorWrapper<List<bool>>.init((wrapper, value) => 'error'),
         ];
 
         final fieldBloc = MultiSelectFieldBloc<bool, dynamic>(
@@ -77,10 +81,13 @@ void main() {
 
       fieldBloc.close();
 
+      ValidatorWrapper<List<bool>> validator = ValidatorWrapper<List<bool>>();
+      validator.validator = (wrapper, value) => 'error';
       fieldBloc = MultiSelectFieldBloc<bool, dynamic>(
         name: 'name',
         initialValue: [true],
-        validators: [(value) => 'error'],
+        // validators: [(value) => 'error'],
+        validators: [ValidatorWrapper<List<bool>>.init((wrapper, value) => 'error')],
         items: [true, false],
       );
 

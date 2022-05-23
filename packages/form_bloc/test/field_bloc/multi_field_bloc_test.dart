@@ -47,7 +47,7 @@ void main() {
       test('Failed validation', () async {
         final field = BooleanFieldBloc<Object>(
           name: 'bool',
-          validators: [FieldBlocValidators.required],
+          validators: [FieldBlocValidators.required()],
         );
 
         final multiField = ListFieldBloc<BooleanFieldBloc<Object>, String>(
@@ -94,8 +94,7 @@ void main() {
           name: 'list',
         );
 
-        final expectedUpdate =
-            createListState<BooleanFieldBloc<Object>, String>(
+        final expectedUpdate = createListState<BooleanFieldBloc<Object>, String>(
           name: 'list',
           formBloc: formBloc,
         );
@@ -118,8 +117,7 @@ void main() {
           fieldBlocs: [field],
         );
 
-        final expectedUpdate =
-            createListState<BooleanFieldBloc<Object>, String>(
+        final expectedUpdate = createListState<BooleanFieldBloc<Object>, String>(
           name: 'list',
           fieldBlocs: [field],
           formBloc: formBloc,
@@ -141,8 +139,7 @@ void main() {
         expect(field.state, expectedBoolUpdate);
 
         final expectedRemove = expectedUpdate.copyWith(formBloc: Param(null));
-        final expectedFieldRemove =
-            expectedBoolUpdate.copyWith(formBloc: Param(null));
+        final expectedFieldRemove = expectedBoolUpdate.copyWith(formBloc: Param(null));
 
         list.removeFormBloc(formBloc);
 
@@ -157,8 +154,7 @@ void main() {
           fieldBlocs: [field],
         );
 
-        final expectedUpdate =
-            createListState<BooleanFieldBloc<Object>, String>(
+        final expectedUpdate = createListState<BooleanFieldBloc<Object>, String>(
           name: 'list',
           fieldBlocs: [field],
           formBloc: formBloc,
