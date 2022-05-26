@@ -23,6 +23,8 @@ part '../multi_select_field/multi_select_field_bloc.dart';
 part '../multi_select_field/multi_select_field_state.dart';
 part '../select_field/select_field_bloc.dart';
 part '../select_field/select_field_state.dart';
+part '../value_item_multi_select_field/value_item_multi_select_field_bloc.dart';
+part '../value_item_multi_select_field/value_item_multi_select_field_state.dart';
 part '../value_item_select_field/value_item_select_field_bloc.dart';
 part '../value_item_select_field/value_item_select_field_state.dart';
 part '../text_field/text_field_bloc.dart';
